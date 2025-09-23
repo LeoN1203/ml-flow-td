@@ -1,0 +1,58 @@
+version: "3.8"
+
+services:
+  # MLflow Tracking Server
+  mlflow:
+    image: ghcr.io/mlflow/mlflow
+    container_name: mlflow-server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - ./mlartifacts:/mlflow/mlartifacts
+    command: >
+      bash -c "chmod 777 /mlflow &&
+      chmod 777 /mlflow/mlartifacts &&
+      chmod 777 /mlflow/mlruns &&
+      mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri file:///mlflow/mlruns --default-artifact-root file:///mlflow/mlartifacts"
+    networks:
+      - mlflow-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  # Model Serving API
+  model-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: model-service
+    ports:
+      - "8000:8000"
+    user: "1000:1000" # Add this to match host user
+    volumes:
+      - ./mlruns:/mlflow/mlruns:rw
+      - ./mlartifacts:/mlflow/mlartifacts:rw
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - DEFAULT_MODEL_NAME=StudentExamPredictor
+      - DEFAULT_MODEL_VERSION=latest
+      - CANARY_PROBABILITY=0.1
+    depends_on:
+      - mlflow
+    networks:
+      - mlflow-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+networks:
+  mlflow-network:
+    driver: bridge
