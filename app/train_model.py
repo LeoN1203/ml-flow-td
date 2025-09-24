@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -7,11 +6,10 @@ from sklearn.metrics import mean_squared_error, r2_score
 import mlflow
 import mlflow.sklearn
 from mlflow.models.signature import infer_signature
-from mlflow.tracking import MlflowClient
 import warnings
 warnings.filterwarnings('ignore')
 
-# ✅ Use docker-compose service name, not localhost
+# Use docker-compose service name because we train inside the container
 MLFLOW_TRACKING_URI = "http://mlflow:5000"
 mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
 
@@ -51,14 +49,14 @@ def train_and_register_model(model_name="StudentExamPredictor"):
 
         mlflow.log_metrics({"mse": mse, "rmse": rmse, "r2_score": r2})
 
-        # ✅ Log model into artifacts
+        # Log model into artifacts
         signature = infer_signature(X_train, y_pred)
         mlflow.sklearn.log_model(
             sk_model=model,
             artifact_path="model",
             signature=signature,
             input_example=X_test.iloc[:3],
-            registered_model_name=model_name,   # ✅ directly register new version
+            registered_model_name=model_name,
         )
 
         print(f"✅ Model registered in MLflow as '{model_name}'")

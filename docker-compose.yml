@@ -32,7 +32,6 @@ services:
     container_name: model-service
     ports:
       - "8000:8000"
-    user: "1000:1000" # Add this to match host user
     volumes:
       - ./mlruns:/mlflow/mlruns:rw
       - ./mlartifacts:/mlflow/mlartifacts:rw

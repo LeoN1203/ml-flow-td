@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any, Optional
 import mlflow
 import mlflow.pyfunc
 import pandas as pd
