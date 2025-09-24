@@ -57,13 +57,13 @@ class PredictionRequest(BaseModel):
         protected_namespaces=(),
         json_schema_extra={
             "example": {
-                "features": {
-                    "study_hours": 6.0,
-                    "attendance_rate": 0.95,
-                    "previous_grade": 85.0,
-                    "sleep_hours": 8.0,
-                    "exercise_hours": 3.0
-                }
+            {
+                "student_id": 1,
+                "hours_studied": 6.0,
+                "sleep_hours": 8.0,
+                "attendance_percent": 0.95,
+                "previous_scores": 85
+            }
             }
         }
     )
